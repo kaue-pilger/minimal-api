@@ -11,6 +11,7 @@ namespace minimal_api.Infrastructure.Db
         }
 
         public DbSet<Admin> Admins { get; set; }
+        public DbSet<Vehicle> Vehicles { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
