@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "go/3jjGnnwc=",
+  "dgSpecHash": "IgKhOoCFrW4=",
   "success": true,
-  "projectFilePath": "C:\\Projects\\InProgress\\minimal-api\\minimal-api.csproj",
+  "projectFilePath": "c:\\Projects\\InProgress\\minimal-api\\minimal-api.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\kaues\\.nuget\\packages\\azure.core\\1.38.0\\azure.core.1.38.0.nupkg.sha512",
     "C:\\Users\\kaues\\.nuget\\packages\\azure.identity\\1.11.3\\azure.identity.1.11.3.nupkg.sha512",
