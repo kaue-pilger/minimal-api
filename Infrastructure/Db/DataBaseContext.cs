@@ -11,6 +11,18 @@ namespace minimal_api.Infrastructure.Db
         }
 
         public DbSet<Admin> Admins { get; set; }
-        
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Admin>().HasData(
+                new Admin {
+                    Id = 1,
+                    Email =  "administrador@teste.com",
+                    Password = "123456", 
+                    Profile = "admin"
+                }
+            );
+        }
+
     }
 }

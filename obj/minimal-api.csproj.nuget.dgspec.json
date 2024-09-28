@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\kaues\\Documents\\Projects\\developing\\minimal-api\\minimal-api.csproj": {}
+    "C:\\Projects\\InProgress\\minimal-api\\minimal-api.csproj": {}
   },
   "projects": {
-    "C:\\Users\\kaues\\Documents\\Projects\\developing\\minimal-api\\minimal-api.csproj": {
+    "C:\\Projects\\InProgress\\minimal-api\\minimal-api.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\kaues\\Documents\\Projects\\developing\\minimal-api\\minimal-api.csproj",
+        "projectUniqueName": "C:\\Projects\\InProgress\\minimal-api\\minimal-api.csproj",
         "projectName": "minimal-api",
-        "projectPath": "C:\\Users\\kaues\\Documents\\Projects\\developing\\minimal-api\\minimal-api.csproj",
+        "projectPath": "C:\\Projects\\InProgress\\minimal-api\\minimal-api.csproj",
         "packagesPath": "C:\\Users\\kaues\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\kaues\\Documents\\Projects\\developing\\minimal-api\\obj\\",
+        "outputPath": "C:\\Projects\\InProgress\\minimal-api\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\kaues\\AppData\\Roaming\\NuGet\\NuGet.Config"
