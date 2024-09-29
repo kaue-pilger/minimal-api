@@ -23,7 +23,7 @@ var app = builder.Build();
 #endregion
 
 #region Home
-app.MapGet("/", () => Results.Json(new Home()));
+app.MapGet("/", () => Results.Json(new Home())).WithTags("Home");
 #endregion
 
 #region Admin
@@ -34,17 +34,10 @@ app.MapPost("/admin/login", ([FromBody] LoginDTO loginDTO, IAdminService adminSe
   else 
     return Results.Unauthorized();
 
-} );
+}).WithTags("Admins");
 #endregion
 
 #region Vehicle
-  app.MapGet("/vehicles", (IVehicleService vehicleService) => {
-    var vehicles = vehicleService.ReadAll();
-
-    return Results.Ok(vehicles);
-
-  } );
-
   app.MapPost("/vehicle", ([FromBody] VehicleDTO vehicleDTO, IVehicleService vehicleService) => {
 
     var vehicleCreated = new Vehicle{
@@ -57,7 +50,43 @@ app.MapPost("/admin/login", ([FromBody] LoginDTO loginDTO, IAdminService adminSe
 
     return Results.Created($"/vehicle/{vehicleCreated.Id}", vehicleCreated);
 
-  } );
+  }).WithTags("Vehicles");
+
+  app.MapGet("/vehicles", (IVehicleService vehicleService) => {
+    var vehicles = vehicleService.ReadAll();
+
+    return Results.Ok(vehicles);
+
+  }).WithTags("Vehicles");
+
+  app.MapGet("/vehicle/{id}", ([FromRoute] int id, IVehicleService vehicleService) => {
+    var vehicle = vehicleService.Read(id);
+    if (vehicle == null) return Results.NotFound();
+    return Results.Ok(vehicle);
+  }).WithTags("Vehicles");
+
+  app.MapPut("/vehicle/{id}", ([FromRoute] int id, VehicleDTO vehicleDTO, IVehicleService vehicleService) => {
+    var vehicle = vehicleService.Read(id);
+    if (vehicle == null) return Results.NotFound();
+
+    vehicle.Name = vehicleDTO.Name;
+    vehicle.Brand = vehicleDTO.Brand;
+    vehicle.Year = vehicleDTO.Year;
+
+    vehicleService.Update(vehicle);
+
+    return Results.Ok(vehicle);
+  }).WithTags("Vehicles");
+
+  app.MapDelete("/vehicle/{id}", ([FromRoute] int id, IVehicleService vehicleService) => {
+    var vehicle = vehicleService.Read(id);
+    if (vehicle == null) return Results.NotFound();
+
+    vehicleService.Delete(vehicle);
+
+    return Results.NoContent();
+  }).WithTags("Vehicles");
+
 #endregion
 
 #region Swagger
