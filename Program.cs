@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using minimal_api.Domain.DTOs;
 using minimal_api.Domain.Entities;
+using minimal_api.Domain.Enums;
 using minimal_api.Domain.Interfaces;
 using minimal_api.Domain.ModelViews;
 using minimal_api.Domain.Services;
@@ -27,19 +28,115 @@ app.MapGet("/", () => Results.Json(new Home())).WithTags("Home");
 #endregion
 
 #region Admin
-app.MapPost("/admin/login", ([FromBody] LoginDTO loginDTO, IAdminService adminService) => {
 
-  if (adminService.Login(loginDTO) != null) 
-    return Results.Ok("Success");
-  else 
-    return Results.Unauthorized();
+  static ValidationErrors validatesAdminDTO (AdminDTO adminDTO) {
+    var validation = new ValidationErrors {
+      Messages = new List<string>()
+    };
 
-}).WithTags("Admins");
+    if (string.IsNullOrEmpty(adminDTO.Email))
+      validation.Messages.Add("Email must be filled.");
+
+    if (string.IsNullOrEmpty(adminDTO.Password))
+      validation.Messages.Add("Password must be filled.");
+
+    if (string.IsNullOrEmpty(adminDTO.Profile.ToString()))
+      validation.Messages.Add("Profile must be filled.");
+
+    return validation;
+  }
+
+  app.MapPost("/admin", ([FromBody] AdminDTO adminDTO, IAdminService adminService) => {
+
+    var validation = validatesAdminDTO(adminDTO);
+    if (validation.Messages.Count > 0) return Results.BadRequest(validation);
+
+    var adminCreated = new Admin{
+      Email = adminDTO.Email,
+      Password = adminDTO.Password,
+      Profile = adminDTO.Profile.ToString() ?? Profile.editor.ToString()
+    };
+
+    adminService.Create(adminCreated);
+
+    return Results.Created($"/vehicle/{adminCreated.Id}", new AdminMV{
+      Id = adminCreated.Id,
+      Email = adminCreated.Email,
+      Profile = adminCreated.Profile,
+    });
+
+  }).WithTags("Admins");
+
+  app.MapGet("/admins", (IAdminService adminService) => {
+    var adminsView = new List<AdminMV>();
+    var admins = adminService.ReadAll();
+
+    foreach (var adm in admins)
+    {
+      adminsView.Add(new AdminMV{
+        Id = adm.Id,
+        Email = adm.Email,
+        Profile = adm.Profile,
+      });
+    }
+
+    return Results.Ok(adminsView);
+
+  }).WithTags("Admins");
+
+  app.MapGet("/admin/{id}", ([FromRoute] int id, IAdminService adminService) => {
+    var admin = adminService.Read(id);
+    if (admin == null) return Results.NotFound();
+  
+    return Results.Ok(new AdminMV{
+      Id = admin.Id,
+      Email = admin.Email,
+      Profile = admin.Profile,
+    });
+  }).WithTags("Admins");
+
+  app.MapPut("/admin/{id}", ([FromRoute] int id, AdminDTO adminDTO, IAdminService adminService) => {
+    var admin = adminService.Read(id);
+    if (admin == null) return Results.NotFound();
+
+    var validation = validatesAdminDTO(adminDTO);
+    if (validation.Messages.Count > 0) return Results.BadRequest(validation);
+
+    admin.Email = adminDTO.Email;
+    admin.Password = adminDTO.Password;
+    admin.Profile = adminDTO.Profile.ToString() ?? Profile.editor.ToString();
+
+    adminService.Update(admin);
+
+    return Results.Ok(new AdminMV{
+      Id = admin.Id,
+      Email = admin.Email,
+      Profile = admin.Profile,
+    });
+  }).WithTags("Admins");
+
+  app.MapDelete("/admin/{id}", ([FromRoute] int id, IAdminService adminService) => {
+    var admin = adminService.Read(id);
+    if (admin == null) return Results.NotFound();
+
+    adminService.Delete(admin);
+
+    return Results.NoContent();
+  }).WithTags("Admins");
+
+  app.MapPost("/admin/login", ([FromBody] LoginDTO loginDTO, IAdminService adminService) => {
+
+    if (adminService.Login(loginDTO) != null) 
+      return Results.Ok("Success");
+    else 
+      return Results.Unauthorized();
+
+  }).WithTags("Admins");
 #endregion
 
 #region Vehicle
 
-  static ValidationErrors validatesDTO (VehicleDTO vehicleDTO) {
+  static ValidationErrors validatesVehicleDTO (VehicleDTO vehicleDTO) {
     var validation = new ValidationErrors {
       Messages = new List<string>()
     };
@@ -58,7 +155,7 @@ app.MapPost("/admin/login", ([FromBody] LoginDTO loginDTO, IAdminService adminSe
 
   app.MapPost("/vehicle", ([FromBody] VehicleDTO vehicleDTO, IVehicleService vehicleService) => {
 
-    var validation = validatesDTO(vehicleDTO);
+    var validation = validatesVehicleDTO(vehicleDTO);
     if (validation.Messages.Count > 0) return Results.BadRequest(validation);
 
     var vehicleCreated = new Vehicle{
@@ -91,7 +188,7 @@ app.MapPost("/admin/login", ([FromBody] LoginDTO loginDTO, IAdminService adminSe
     var vehicle = vehicleService.Read(id);
     if (vehicle == null) return Results.NotFound();
 
-    var validation = validatesDTO(vehicleDTO);
+    var validation = validatesVehicleDTO(vehicleDTO);
     if (validation.Messages.Count > 0) return Results.BadRequest(validation);
 
     vehicle.Name = vehicleDTO.Name;
