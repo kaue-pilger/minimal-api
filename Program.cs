@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using minimal_api.Domain.DTOs;
 using minimal_api.Domain.Entities;
 using minimal_api.Domain.Enums;
@@ -24,7 +25,9 @@ using minimal_api.Infrastructure.Db;
   }).AddJwtBearer(option => {
     option.TokenValidationParameters = new TokenValidationParameters {
       ValidateLifetime = true,
-      IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key))
+      IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)),
+      ValidateIssuer = false,
+      ValidateAudience = false
     };
   });
 
@@ -32,6 +35,31 @@ using minimal_api.Infrastructure.Db;
 
   builder.Services.AddEndpointsApiExplorer();
   builder.Services.AddSwaggerGen();
+  builder.Services.AddSwaggerGen(options => {
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme 
+    {
+      Name = "Authorization",
+      Type = SecuritySchemeType.Http,
+      Scheme = "bearer",
+      BearerFormat = "JWT",
+      In = ParameterLocation.Header,
+      Description = "Put JWT Token here:"
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement 
+    {
+      {
+        new OpenApiSecurityScheme {
+          Reference =  new OpenApiReference 
+          {
+            Type =  ReferenceType.SecurityScheme,
+            Id = "Bearer"
+          }
+        },
+        new string[] {}
+      }
+    });
+  });
 
   builder.Services.AddScoped<IAdminService, AdminService>();
   builder.Services.AddScoped<IVehicleService, VehicleService>();
@@ -43,7 +71,7 @@ using minimal_api.Infrastructure.Db;
 #endregion
 
 #region Home
-app.MapGet("/", () => Results.Json(new Home())).WithTags("Home");
+app.MapGet("/", () => Results.Json(new Home())).AllowAnonymous().WithTags("Home");
 #endregion
 
 #region Admin
@@ -176,7 +204,7 @@ app.MapGet("/", () => Results.Json(new Home())).WithTags("Home");
     else 
       return Results.Unauthorized();
 
-  }).WithTags("Admins");
+  }).AllowAnonymous().WithTags("Admins");
 #endregion
 
 #region Vehicle
