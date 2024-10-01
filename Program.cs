@@ -2,6 +2,8 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -85,6 +87,7 @@ app.MapGet("/", () => Results.Json(new Home())).AllowAnonymous().WithTags("Home"
     var claims = new List<Claim>(){
       new Claim("Email", admin.Email),
       new Claim("Profile", admin.Profile),
+      new Claim(ClaimTypes.Role, admin.Profile),
     };
 
     var token = new JwtSecurityToken (
@@ -132,7 +135,7 @@ app.MapGet("/", () => Results.Json(new Home())).AllowAnonymous().WithTags("Home"
       Profile = adminCreated.Profile,
     });
 
-  }).RequireAuthorization().WithTags("Admins");
+  }).RequireAuthorization().RequireAuthorization(new AuthorizeAttribute { Roles = "admin"}).WithTags("Admins");
 
   app.MapGet("/admins", (IAdminService adminService) => {
     var adminsView = new List<AdminMV>();
@@ -149,7 +152,7 @@ app.MapGet("/", () => Results.Json(new Home())).AllowAnonymous().WithTags("Home"
 
     return Results.Ok(adminsView);
 
-  }).RequireAuthorization().WithTags("Admins");
+  }).RequireAuthorization().RequireAuthorization(new AuthorizeAttribute { Roles = "admin"}).WithTags("Admins");
 
   app.MapGet("/admin/{id}", ([FromRoute] int id, IAdminService adminService) => {
     var admin = adminService.Read(id);
@@ -160,7 +163,7 @@ app.MapGet("/", () => Results.Json(new Home())).AllowAnonymous().WithTags("Home"
       Email = admin.Email,
       Profile = admin.Profile,
     });
-  }).RequireAuthorization().WithTags("Admins");
+  }).RequireAuthorization().RequireAuthorization(new AuthorizeAttribute { Roles = "admin"}).WithTags("Admins");
 
   app.MapPut("/admin/{id}", ([FromRoute] int id, AdminDTO adminDTO, IAdminService adminService) => {
     var admin = adminService.Read(id);
@@ -180,7 +183,7 @@ app.MapGet("/", () => Results.Json(new Home())).AllowAnonymous().WithTags("Home"
       Email = admin.Email,
       Profile = admin.Profile,
     });
-  }).RequireAuthorization().WithTags("Admins");
+  }).RequireAuthorization().RequireAuthorization(new AuthorizeAttribute { Roles = "admin"}).WithTags("Admins");
 
   app.MapDelete("/admin/{id}", ([FromRoute] int id, IAdminService adminService) => {
     var admin = adminService.Read(id);
@@ -189,7 +192,7 @@ app.MapGet("/", () => Results.Json(new Home())).AllowAnonymous().WithTags("Home"
     adminService.Delete(admin);
 
     return Results.NoContent();
-  }).RequireAuthorization().WithTags("Admins");
+  }).RequireAuthorization().RequireAuthorization(new AuthorizeAttribute { Roles = "admin"}).WithTags("Admins");
 
   app.MapPost("/admin/login", ([FromBody] LoginDTO loginDTO, IAdminService adminService) => {
     var admin = adminService.Login(loginDTO);
@@ -241,7 +244,7 @@ app.MapGet("/", () => Results.Json(new Home())).AllowAnonymous().WithTags("Home"
 
     return Results.Created($"/vehicle/{vehicleCreated.Id}", vehicleCreated);
 
-  }).RequireAuthorization().WithTags("Vehicles");
+  }).RequireAuthorization().RequireAuthorization(new AuthorizeAttribute { Roles = "admin,editor"}).WithTags("Vehicles");
 
   app.MapGet("/vehicles", (IVehicleService vehicleService) => {
     var vehicles = vehicleService.ReadAll();
@@ -255,7 +258,7 @@ app.MapGet("/", () => Results.Json(new Home())).AllowAnonymous().WithTags("Home"
     if (vehicle == null) return Results.NotFound();
 
     return Results.Ok(vehicle);
-  }).RequireAuthorization().WithTags("Vehicles");
+  }).RequireAuthorization().RequireAuthorization(new AuthorizeAttribute { Roles = "admin,editor"}).WithTags("Vehicles");
 
   app.MapPut("/vehicle/{id}", ([FromRoute] int id, VehicleDTO vehicleDTO, IVehicleService vehicleService) => {
     var vehicle = vehicleService.Read(id);
@@ -271,7 +274,7 @@ app.MapGet("/", () => Results.Json(new Home())).AllowAnonymous().WithTags("Home"
     vehicleService.Update(vehicle);
 
     return Results.Ok(vehicle);
-  }).RequireAuthorization().WithTags("Vehicles");
+  }).RequireAuthorization().RequireAuthorization(new AuthorizeAttribute { Roles = "admin"}).WithTags("Vehicles");
 
   app.MapDelete("/vehicle/{id}", ([FromRoute] int id, IVehicleService vehicleService) => {
     var vehicle = vehicleService.Read(id);
@@ -280,7 +283,7 @@ app.MapGet("/", () => Results.Json(new Home())).AllowAnonymous().WithTags("Home"
     vehicleService.Delete(vehicle);
 
     return Results.NoContent();
-  }).RequireAuthorization().WithTags("Vehicles");
+  }).RequireAuthorization().RequireAuthorization(new AuthorizeAttribute { Roles = "admin"}).WithTags("Vehicles");
 
 #endregion
 
